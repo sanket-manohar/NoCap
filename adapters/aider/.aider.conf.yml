@@ -1,0 +1,3 @@
+# NoCap: load the agent instructions into every Aider session
+read:
+  - .nocap/AGENTS.md

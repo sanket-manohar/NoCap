@@ -1,0 +1,16 @@
+name: 🔍 New rule / check
+description: Suggest a vulnerability pattern, checklist item or compliance control
+labels: [enhancement]
+body:
+  - type: input
+    id: lang
+    attributes: { label: Language / framework / platform }
+  - type: textarea
+    id: bad
+    attributes: { label: Vulnerable example, render: text }
+  - type: textarea
+    id: good
+    attributes: { label: Standard correct fix, render: text }
+  - type: input
+    id: ref
+    attributes: { label: Reference (CWE / OWASP / official docs) }

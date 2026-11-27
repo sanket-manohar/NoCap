@@ -1,0 +1,32 @@
+name: Release
+on:
+  push:
+    tags: ["v*.*.*"]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test
+        run: python -m unittest discover -s tests
+      - name: Build release archive
+        run: |
+          VER="${GITHUB_REF_NAME}"
+          git archive --format=zip --prefix="nocap-${VER}/" -o "nocap-${VER}.zip" HEAD
+          sha256sum "nocap-${VER}.zip" > "nocap-${VER}.zip.sha256"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "nocap-${GITHUB_REF_NAME}.zip" "nocap-${GITHUB_REF_NAME}.zip.sha256" \
+            --title "NoCap $GITHUB_REF_NAME" --notes-file RELEASE_NOTES.md
+      - name: Move major tag (e.g. v1) for the GitHub Action
+        run: |
+          MAJOR="${GITHUB_REF_NAME%%.*}"
+          git tag -f "$MAJOR"
+          git push -f origin "$MAJOR"

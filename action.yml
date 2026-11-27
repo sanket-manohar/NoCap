@@ -1,0 +1,62 @@
+name: "NoCap — docs + security for AI-built apps"
+description: "Security, hygiene & documentation audit for AI-built (vibe-coded) software. Zero dependencies."
+author: "Sanket Santosh Vidya Manohar"
+branding:
+  icon: "shield"
+  color: "purple"
+inputs:
+  path:
+    description: "Directory to scan"
+    default: "."
+  fail-on:
+    description: "Fail the job at or above this severity: critical | high | medium | low | none"
+    default: "high"
+  exclude:
+    description: "Comma-separated globs to exclude"
+    default: ""
+  upload-report:
+    description: "Upload NOCAP_REPORT.md, JSON results and badge as a build artifact"
+    default: "true"
+outputs:
+  score:
+    description: "Overall NoCap score (0-100)"
+    value: ${{ steps.scan.outputs.score }}
+  grade:
+    description: "Grade (A+ … F)"
+    value: ${{ steps.scan.outputs.grade }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - id: scan
+      shell: bash
+      env:
+        VP_PATH: ${{ inputs.path }}
+        VP_FAIL_ON: ${{ inputs.fail-on }}
+        VP_EXCLUDE: ${{ inputs.exclude }}
+      run: |
+        EXCLUDES=()
+        IFS=',' read -ra GLOBS <<< "$VP_EXCLUDE"
+        for g in "${GLOBS[@]}"; do [ -n "$g" ] && EXCLUDES+=(--exclude "$g"); done
+        set +e
+        python "$GITHUB_ACTION_PATH/scanner/nocap.py" "$VP_PATH" --no-color \
+          --out NOCAP_REPORT.md --json nocap-results.json --badge nocap-badge.svg \
+          --fail-on "$VP_FAIL_ON" "${EXCLUDES[@]}"
+        CODE=$?
+        set -e
+        cat "$VP_PATH/NOCAP_REPORT.md" >> "$GITHUB_STEP_SUMMARY"
+        python -c "import json;s=json.load(open('nocap-results.json'))['score'];print(f\"score={s['overall']}\");print(f\"grade={s['grade']}\")" >> "$GITHUB_OUTPUT"
+        mv "$VP_PATH/NOCAP_REPORT.md" . 2>/dev/null || true
+        echo "VP_EXIT=$CODE" >> "$GITHUB_ENV"
+    - if: inputs.upload-report == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: nocap-report
+        path: |
+          NOCAP_REPORT.md
+          nocap-results.json
+          nocap-badge.svg
+    - shell: bash
+      run: exit "${VP_EXIT:-0}"

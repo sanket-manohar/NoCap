@@ -1,0 +1,43 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.8", "3.12", "3.13"]
+        exclude:
+          - os: macos-latest
+            python: "3.8"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover -s tests -v
+      - name: Adapters are up to date
+        run: python tools/build_adapters.py && git diff --exit-code adapters/
+  install-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: bash installer
+        run: mkdir /tmp/a && ./install.sh /tmp/a --ci && test -f /tmp/a/.cursor/rules/nocap.mdc && /tmp/a/.nocap/vp /tmp/a --quiet
+      - name: npx installer
+        run: mkdir /tmp/b && node bin/nocap.js init /tmp/b && test -f /tmp/b/CLAUDE.md
+      - name: uninstall
+        run: ./install.sh /tmp/a --uninstall && test ! -d /tmp/a/.nocap
+  self-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          fail-on: high
+          exclude: "tests/*"

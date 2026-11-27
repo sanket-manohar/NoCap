@@ -1,0 +1,16 @@
+# NoCap — runs on every push / PR. Fails the build on high or critical findings.
+name: NoCap
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  nocap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: sanket-manohar/nocap@v1
+        with:
+          fail-on: high        # critical | high | medium | low | none

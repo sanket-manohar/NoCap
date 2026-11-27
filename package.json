@@ -1,0 +1,53 @@
+{
+  "name": "nocap",
+  "version": "1.0.0",
+  "description": "Your AI wrote the code. NoCap documents it, audits its security and checks compliance. Any AI, any IDE, any stack.",
+  "bin": {
+    "nocap": "bin/nocap.js"
+  },
+  "files": [
+    "bin",
+    "scanner/nocap.py",
+    "prompts",
+    "templates",
+    "checklists",
+    "adapters",
+    "AGENTS.md",
+    "MASTER_PROMPT.md",
+    "TERMS.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "python3 -m unittest discover -s tests"
+  },
+  "keywords": [
+    "nocap",
+    "vibe-coding",
+    "ai",
+    "security",
+    "documentation",
+    "owasp",
+    "compliance",
+    "gdpr",
+    "dpdp",
+    "cursor",
+    "claude-code",
+    "copilot",
+    "windsurf",
+    "agents-md",
+    "sast"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanket-manohar/nocap.git"
+  },
+  "author": "Sanket Santosh Vidya Manohar",
+  "homepage": "https://github.com/sanket-manohar/nocap#readme",
+  "bugs": {
+    "url": "https://github.com/sanket-manohar/nocap/issues"
+  }
+}
