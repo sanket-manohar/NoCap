@@ -51,7 +51,7 @@ runs:
         mv "$VP_PATH/NOCAP_REPORT.md" . 2>/dev/null || true
         echo "VP_EXIT=$CODE" >> "$GITHUB_ENV"
     - if: inputs.upload-report == 'true'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: nocap-report
         path: |
