@@ -22,6 +22,7 @@
 </p>
 
 <p align="center">
+  <a href="https://sanket-manohar.github.io/NoCap/"><b>🌐 Website</b></a> ·
   <a href="#-quick-start">Quick start</a> ·
   <a href="#-all-commands">Commands</a> ·
   <a href="#-use-it-in-your-ai-tool">AI tools</a> ·

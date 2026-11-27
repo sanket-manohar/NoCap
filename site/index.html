@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NoCap: get the receipts on your AI-built app</title>
+<meta name="description" content="NoCap documents your app, audits its security and checks compliance from inside the AI tool you already use. Free, offline scanner, any language, any IDE.">
+<meta name="author" content="Sanket Santosh Vidya Manohar">
+<meta property="og:title" content="NoCap: get the receipts on your AI-built app">
+<meta property="og:description" content="Docs, security audit and compliance check for anything you vibe-coded. One command. Any AI. Any IDE.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#2433ff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232433ff'/%3E%3Cpath d='M18 33l9 9 19-20' fill='none' stroke='%23fff' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cobalt: #2433ff;
+    --cobalt-deep: #1620c4;
+    --paper: #fbfaf6;
+    --ink: #14143c;
+    --ink-soft: #4a4a72;
+    --pink: #ff4fa3;
+    --lemon: #ffe14d;
+    --rule: #d9d8e6;
+    --display: "Bricolage Grotesque", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.6 var(--display); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--lemon); outline-offset: 3px; border-radius: 4px; }
+  .wrap { width: min(1120px, 100% - 2.5rem); margin-inline: auto; }
+  code, kbd, pre { font-family: var(--mono); }
+
+  /* ---------- top bar ---------- */
+  .bar { background: var(--cobalt); color: #fff; }
+  .bar .wrap { display: flex; align-items: center; justify-content: space-between; padding-block: 1.1rem; }
+  .logo { font-weight: 800; font-size: 1.35rem; letter-spacing: -0.02em; text-decoration: none; display: inline-flex; gap: .5rem; align-items: center; }
+  .logo svg { width: 28px; height: 28px; }
+  .bar nav { display: flex; gap: 1.5rem; font-size: .95rem; }
+  .bar nav a { text-decoration: none; opacity: .85; }
+  .bar nav a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+
+  /* ---------- hero ---------- */
+  .hero { background: var(--cobalt); color: #fff; padding: 3.5rem 0 5.5rem; overflow: hidden; }
+  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 3.5rem; align-items: start; }
+  .hero h1 { font-weight: 800; font-size: clamp(2.8rem, 6.4vw, 5.4rem); line-height: .95; letter-spacing: -0.035em; margin: .2rem 0 1.4rem; font-variation-settings: "opsz" 96; }
+  .hero p.lede { font-size: 1.25rem; line-height: 1.5; max-width: 34ch; margin: 0 0 2.2rem; color: #e4e6ff; }
+
+  .install { background: var(--cobalt-deep); border-radius: 14px; padding: .4rem; max-width: 560px; min-width: 0; }
+  .tabs { display: flex; gap: .25rem; flex-wrap: wrap; }
+  .tabs button { font: 600 .9rem var(--display); color: #c9ccff; background: transparent; border: 0; padding: .55rem .85rem; border-radius: 9px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); }
+  .cmd { display: flex; align-items: center; gap: .75rem; padding: .9rem .9rem .7rem 1rem; }
+  .cmd code { flex: 1; min-width: 0; font-size: .88rem; color: #fff; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; }
+  .cmd code .p { color: var(--lemon); user-select: none; }
+  .copy { font: 600 .85rem var(--display); background: var(--lemon); color: var(--ink); border: 0; border-radius: 8px; padding: .5rem .9rem; cursor: pointer; flex-shrink: 0; }
+  .copy:active { transform: translateY(1px); }
+  .then { margin: 1.4rem 0 0; color: #d5d8ff; font-size: 1rem; }
+  .then code { background: rgba(255,255,255,.14); color: #fff; padding: .15rem .45rem; border-radius: 6px; font-size: .9rem; }
+
+  /* ---------- receipt (the one loud thing) ---------- */
+  .slot { position: relative; padding-top: 14px; }
+  .slot::before { content: ""; position: absolute; top: 0; left: -14px; right: -14px; height: 14px; background: var(--ink); border-radius: 8px; box-shadow: inset 0 -4px 0 #000; }
+  .receipt-clip { overflow: hidden; }
+  .receipt {
+    background: var(--paper); color: var(--ink); font: 400 .82rem/1.55 var(--mono);
+    padding: 1.6rem 1.5rem 2.2rem; position: relative;
+    --tooth: 10px;
+    -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / var(--tooth) 100%;
+            mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / var(--tooth) 100%;
+    animation: print 2.4s steps(24, end) .35s both;
+  }
+  @keyframes print { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+  .receipt .c { text-align: center; }
+  .receipt .big { font-weight: 700; font-size: 1.05rem; letter-spacing: .08em; }
+  .receipt hr { border: 0; border-top: 2px dashed var(--ink); margin: .8rem 0; opacity: .55; }
+  .receipt .row { display: flex; justify-content: space-between; gap: 1rem; }
+  .receipt .row small { display: block; color: var(--ink-soft); font-size: .72rem; }
+  .receipt .total { font-weight: 700; font-size: 1.15rem; }
+  .barcode { height: 46px; margin: 1rem 0 .3rem; width: 58%; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 7px, transparent 7px 9px, var(--ink) 9px 10px, transparent 10px 13px); }
+  .stamp {
+    position: absolute; right: 1.1rem; bottom: 2.6rem; width: 84px; height: 84px; border-radius: 50%;
+    background: var(--pink); color: #fff; display: grid; place-items: center; text-align: center;
+    font: 800 2.2rem/1 var(--display); transform: rotate(-14deg); opacity: .94; box-shadow: 0 0 0 4px var(--paper), 0 0 0 6px var(--pink);
+    animation: stamp .3s cubic-bezier(.2,1.6,.4,1) 2.9s both;
+  }
+  .stamp span { display: block; font: 700 .62rem/1.1 var(--mono); margin-top: .15rem; }
+  @keyframes stamp { from { transform: rotate(-14deg) scale(2.4); opacity: 0; } to { transform: rotate(-14deg) scale(1); opacity: .94; } }
+  .receipt-note { color: #d5d8ff; font-size: .9rem; margin: 1rem 0 0; }
+
+  /* ---------- sections ---------- */
+  section { padding: 5.5rem 0; }
+  section + section { border-top: 1px solid var(--rule); }
+  h1, h2 { text-wrap: balance; }
+  h2 { font-weight: 800; font-size: clamp(2rem, 4vw, 3.1rem); line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 1rem; max-width: 22ch; }
+  .sub { color: var(--ink-soft); font-size: 1.15rem; max-width: 56ch; margin: 0 0 3rem; }
+
+  /* paths: a real choice, laid out as three plain columns */
+  .paths { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
+  .paths h3 { font-size: 1.35rem; margin: 0 0 .5rem; letter-spacing: -0.01em; }
+  .paths p { margin: 0 0 1rem; color: var(--ink-soft); }
+  .paths .tag { display: inline-block; font-weight: 600; font-size: .85rem; padding: .2rem .6rem; border-radius: 999px; margin-bottom: 1rem; }
+  .paths div:nth-child(1) .tag { background: var(--lemon); }
+  .paths div:nth-child(2) .tag { background: var(--cobalt); color: #fff; }
+  .paths div:nth-child(3) .tag { background: var(--pink); color: #fff; }
+  pre.block { background: var(--ink); color: #f1f1ff; border-radius: 10px; padding: 1rem 1.1rem; font-size: .8rem; line-height: 1.6; overflow-x: auto; margin: 0; }
+
+  /* commands: a menu you can click to copy */
+  .menu { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 4rem; }
+  .menu li { break-inside: avoid; padding: 1rem 0; border-bottom: 1px solid var(--rule); }
+  .menu button { all: unset; cursor: pointer; font: 700 1.02rem var(--mono); color: var(--cobalt); }
+  .menu button:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .menu button:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; border-radius: 4px; }
+  .menu p { margin: .3rem 0 0; color: var(--ink-soft); font-size: .98rem; }
+  .menu .out { font-family: var(--mono); font-size: .8rem; color: var(--ink); background: #ececf6; padding: .05rem .4rem; border-radius: 5px; }
+  .guard { margin-top: 3rem; max-width: 64ch; font-size: 1.05rem; }
+  .guard strong { background: linear-gradient(transparent 60%, var(--lemon) 60%); }
+
+  /* grade scale: ordered, so it reads left to right */
+  .scale { display: grid; grid-template-columns: repeat(6, 1fr); border-radius: 14px; overflow: hidden; }
+  .scale div { padding: 1.4rem 1rem 1.2rem; color: var(--ink); }
+  .scale b { display: block; font-size: 2.4rem; line-height: 1; letter-spacing: -0.03em; }
+  .scale span { display: block; font-size: .78rem; font-family: var(--mono); margin: .35rem 0 .7rem; opacity: .8; }
+  .scale em { font-style: normal; font-weight: 600; font-size: .98rem; line-height: 1.3; display: block; }
+  .g1 { background: #3ddc84; } .g2 { background: #8fe36a; } .g3 { background: var(--lemon); }
+  .g4 { background: #ffb547; } .g5 { background: #ff7a59; } .g6 { background: var(--pink); color: #fff !important; }
+  .formula { margin-top: 1.3rem; color: var(--ink-soft); font-size: .98rem; }
+
+  /* tools */
+  .tools { display: flex; flex-wrap: wrap; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+  .tools li { border: 2px solid var(--ink); border-radius: 999px; padding: .45rem 1rem; font-weight: 600; font-size: .98rem; }
+  .tools li.any { background: var(--ink); color: var(--paper); }
+
+  /* checks */
+  .checks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 4rem; margin: 0; padding: 0; list-style: none; }
+  .checks li { padding: .9rem 0; border-bottom: 1px solid var(--rule); }
+  .checks b { display: block; font-size: 1.05rem; }
+  .checks span { color: var(--ink-soft); font-size: .95rem; }
+  .stack { margin-top: 2.5rem; font-family: var(--mono); font-size: .85rem; color: var(--ink-soft); line-height: 1.9; max-width: 80ch; }
+
+  /* terms */
+  .terms { background: var(--lemon); }
+  .terms h2 { max-width: none; }
+  .terms ul { max-width: 70ch; padding-left: 1.2rem; margin: 0 0 1.6rem; font-size: 1.05rem; }
+  .terms li { margin-bottom: .45rem; }
+  .btn { display: inline-block; font-weight: 600; text-decoration: none; background: var(--ink); color: var(--paper); padding: .8rem 1.3rem; border-radius: 10px; }
+  .btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); margin-left: .5rem; }
+
+  footer { background: var(--ink); color: #c8c8e6; padding: 3rem 0; font-size: .95rem; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; }
+  footer strong { color: #fff; }
+  footer nav { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+
+  .toast { position: fixed; left: 50%; bottom: 1.5rem; transform: translate(-50%, 300%); visibility: hidden; background: var(--ink); color: #fff; padding: .7rem 1.1rem; border-radius: 10px; font-size: .95rem; transition: transform .25s; z-index: 10; }
+  .toast.show { transform: translate(-50%, 0); visibility: visible; }
+
+  @media (max-width: 900px) {
+    .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 3rem; }
+    .paths { grid-template-columns: 1fr; gap: 2.5rem; }
+    .menu { columns: 1; }
+    .checks { grid-template-columns: 1fr; }
+    .scale { grid-template-columns: repeat(3, 1fr); }
+    .bar nav a:not(.gh) { display: none; }
+  }
+  @media (max-width: 520px) {
+    .stamp { width: 70px; height: 70px; font-size: 1.8rem; bottom: 2.4rem; right: .8rem; }
+    .scale { grid-template-columns: repeat(2, 1fr); }
+    .btn.ghost { margin: .7rem 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="NoCap home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#fff"/><path d="M18 33l9 9 19-20" fill="none" stroke="#2433ff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      NoCap
+    </a>
+    <nav aria-label="Main">
+      <a href="#start">Install</a>
+      <a href="#commands">Commands</a>
+      <a href="#score">Score</a>
+      <a href="#terms">Terms</a>
+      <a class="gh" href="https://github.com/sanket-manohar/nocap">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Your AI wrote the code. Get the receipts.</h1>
+        <p class="lede">NoCap documents your app, audits its security and checks compliance, from inside the AI tool you already use.</p>
+
+        <div class="install" id="start">
+          <div class="tabs" role="tablist" aria-label="Choose how to install">
+            <button role="tab" aria-selected="true" aria-controls="cmd" data-cmd="curl -fsSL https://raw.githubusercontent.com/sanket-manohar/nocap/main/install.sh | bash">macOS / Linux</button>
+            <button role="tab" aria-selected="false" aria-controls="cmd" data-cmd="irm https://raw.githubusercontent.com/sanket-manohar/nocap/main/install.ps1 | iex">Windows</button>
+            <button role="tab" aria-selected="false" aria-controls="cmd" data-cmd="npx github:sanket-manohar/nocap init">npx</button>
+          </div>
+          <div class="cmd" id="cmd" role="tabpanel">
+            <code><span class="p">$ </span><span id="cmd-text">curl -fsSL https://raw.githubusercontent.com/sanket-manohar/nocap/main/install.sh | bash</span></code>
+            <button class="copy" type="button" data-copy-target="cmd-text">Copy</button>
+          </div>
+        </div>
+        <p class="then">Run it in your project folder, then type <code>nocap audit</code> in Cursor, Claude Code, Copilot or any AI chat.</p>
+      </div>
+
+      <div>
+        <div class="slot">
+          <div class="receipt-clip">
+            <div class="receipt" role="img" aria-label="Example NoCap scan receipt: five findings, total score 34 out of 100, grade F, verdict cooked">
+              <div class="c big">NOCAP SCAN</div>
+              <div class="c">my-weekend-app · main</div>
+              <div class="c">28 NOV 2026  02:14</div>
+              <hr>
+              <div class="row"><span>Secret in frontend<small>src/lib/ai.ts:4</small></span><span>-25</span></div>
+              <div class="row"><span>RLS disabled<small>supabase/001_init.sql:12</small></span><span>-25</span></div>
+              <div class="row"><span>LLM key in browser<small>Chat.tsx:9</small></span><span>-10</span></div>
+              <div class="row"><span>Token in localStorage<small>useAuth.ts:22</small></span><span>-4</span></div>
+              <div class="row"><span>No tests found</span><span>-4</span></div>
+              <div class="row"><span>Docs written</span><span>3/17</span></div>
+              <hr>
+              <div class="row total"><span>TOTAL</span><span>34/100</span></div>
+              <div class="row"><span>Verdict</span><span>cooked 💀</span></div>
+              <hr>
+              <div class="c">Fix for every line included.</div>
+              <div class="barcode" aria-hidden="true"></div>
+              <div>thank u, next scan</div>
+              <div class="stamp" aria-hidden="true">F<span>NO CAP</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="receipt-note">This is the real report format. Each finding comes with the standard fix.</p>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2>Three ways in. Pick one.</h2>
+      <p class="sub">All of them take less than a minute. Nothing to configure. NoCap detects your stack on its own.</p>
+      <div class="paths">
+        <div>
+          <span class="tag">Just trying it</span>
+          <h3>Paste one prompt</h3>
+          <p>Copy the master prompt into ChatGPT, Claude, Gemini or any chat, attach your code, send.</p>
+          <a class="btn" href="https://github.com/sanket-manohar/nocap/blob/main/MASTER_PROMPT.md">Open the master prompt</a>
+        </div>
+        <div>
+          <span class="tag">Coding in an AI IDE</span>
+          <h3>Install into your project</h3>
+          <p>One line adds the right rules for every AI tool. Then you talk to your AI in plain words.</p>
+          <pre class="block">nocap docs
+nocap audit
+nocap ship</pre>
+        </div>
+        <div>
+          <span class="tag">Shipping with a team</span>
+          <h3>Check every pull request</h3>
+          <p>Add the GitHub Action. Every PR gets a report, and risky ones fail the build.</p>
+          <pre class="block">- uses: sanket-manohar/nocap@v1
+  with:
+    fail-on: high</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="commands">
+    <div class="wrap">
+      <h2>Say it like you mean it.</h2>
+      <p class="sub">Type these in your AI assistant's chat. Click any command to copy it.</p>
+      <ul class="menu">
+        <li><button type="button" data-copy="nocap docs">nocap docs</button><p>Writes the full documentation set from your real code. <span class="out">docs/</span></p></li>
+        <li><button type="button" data-copy="nocap audit">nocap audit</button><p>Finds security problems, with file, line and the corrected code. <span class="out">SECURITY_AUDIT.md</span></p></li>
+        <li><button type="button" data-copy="nocap fix">nocap fix</button><p>Fixes findings, most serious first, with a test for each.</p></li>
+        <li><button type="button" data-copy="nocap review">nocap review</button><p>Reviews your current changes like a strict senior dev.</p></li>
+        <li><button type="button" data-copy="nocap compliance all">nocap compliance all</button><p>Gap check for GDPR, India DPDP, HIPAA, PCI, SOC 2, ISO 27001, WCAG, EU AI Act. <span class="out">COMPLIANCE.md</span></p></li>
+        <li><button type="button" data-copy="nocap threat-model">nocap threat-model</button><p>Maps how your app could be attacked and how to stop it. <span class="out">THREAT_MODEL.md</span></p></li>
+        <li><button type="button" data-copy="nocap architecture">nocap architecture</button><p>Diagrams of how everything connects, plus a design review.</p></li>
+        <li><button type="button" data-copy="nocap explain">nocap explain</button><p>A plain-English guide to your own codebase. <span class="out">ONBOARDING.md</span></p></li>
+        <li><button type="button" data-copy="nocap update">nocap update</button><p>Refreshes only the docs your recent changes affected.</p></li>
+        <li><button type="button" data-copy="nocap score">nocap score</button><p>Your score and a badge for your README.</p></li>
+        <li><button type="button" data-copy="nocap ship">nocap ship</button><p>13 launch checks, then a straight answer: GO or NO-GO.</p></li>
+        <li><button type="button" data-copy="nocap">nocap</button><p>Lists everything and suggests what to run next.</p></li>
+      </ul>
+      <p class="guard">Even when you type nothing, NoCap keeps your AI honest: <strong>no hard-coded secrets, auth checked on the server, safe database queries, rate limits</strong> and safe use of AI models, by default.</p>
+    </div>
+  </section>
+
+  <section id="score">
+    <div class="wrap">
+      <h2>Your app gets a grade. No cap.</h2>
+      <p class="sub">The scanner runs offline on your machine. It checks 20+ languages for 100+ known problems and tells you how to fix each one.</p>
+      <div class="scale" role="list">
+        <div class="g1" role="listitem"><b>A+</b><span>95–100</span><em>it's giving secure ✨</em></div>
+        <div class="g2" role="listitem"><b>A</b><span>85–94</span><em>solid, no cap 💪</em></div>
+        <div class="g3" role="listitem"><b>B</b><span>70–84</span><em>mid but fixable 🛠️</em></div>
+        <div class="g4" role="listitem"><b>C</b><span>55–69</span><em>kinda sus 👀</em></div>
+        <div class="g5" role="listitem"><b>D</b><span>40–54</span><em>red flags everywhere 🚩</em></div>
+        <div class="g6" role="listitem"><b>F</b><span>0–39</span><em>cooked 💀</em></div>
+      </div>
+      <p class="formula">Score is 70% security and 30% documentation. One critical issue caps you at 49, one high issue at 79, so good docs can't hide a real hole.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Works where you already work.</h2>
+      <p class="sub">The installer adds the right rules file for each tool, all generated from one source so they never disagree. Your existing files stay intact.</p>
+      <ul class="tools">
+        <li>Claude Code</li><li>Cursor</li><li>GitHub Copilot</li><li>Windsurf</li><li>Cline</li><li>Roo Code</li>
+        <li>Continue</li><li>Gemini CLI</li><li>OpenAI Codex</li><li>JetBrains Junie</li><li>Aider</li><li>Zed</li>
+        <li>ChatGPT</li><li>Claude.ai</li><li class="any">any AGENTS.md tool</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>What it actually catches.</h2>
+      <p class="sub">The mistakes that keep showing up in apps built fast with AI, plus the standards auditors ask about.</p>
+      <ul class="checks">
+        <li><b>Leaked keys</b><span>OpenAI, Stripe, AWS, GitHub and more, including secrets hidden behind NEXT_PUBLIC_ or VITE_</span></li>
+        <li><b>Open databases</b><span>Supabase tables without RLS, Firebase rules set to "if true", service keys in the app</span></li>
+        <li><b>Injection</b><span>SQL, NoSQL and shell commands built from user input, in every major language</span></li>
+        <li><b>Broken access</b><span>Users reading each other's data, admin routes left open, mass assignment</span></li>
+        <li><b>AI-specific risks</b><span>Model keys in the browser, model output being executed, over-powered agent tools</span></li>
+        <li><b>Cloud and CI</b><span>Root containers, public buckets, open ports, injectable GitHub Actions</span></li>
+        <li><b>Mobile</b><span>Cleartext traffic, debuggable builds, tokens in plain storage</span></li>
+        <li><b>Missing basics</b><span>No tests, no lockfile, no .gitignore, .env committed, no docs</span></li>
+      </ul>
+      <p class="stack">JS/TS  Python  Java  Kotlin  Go  PHP  Ruby  C#  Rust  C/C++  Swift  Dart  SQL  Shell  Solidity  Terraform  Docker  Kubernetes  YAML  JSON  .env</p>
+    </div>
+  </section>
+
+  <section class="terms" id="terms">
+    <div class="wrap">
+      <h2>Read this before you ship.</h2>
+      <ul>
+        <li>NoCap is a free development aid. It can miss problems, and so can the AI tools that use it.</li>
+        <li>A high score or a GO does not mean your app is secure or compliant.</li>
+        <li>Final checks are your responsibility. Review and test every finding, fix and document yourself.</li>
+        <li>It is not legal, security or compliance advice.</li>
+        <li>Provided as is, with no warranty. The author accepts no liability for any loss, breach, fine or claim.</li>
+        <li>Only scan code and systems you own or are allowed to test.</li>
+      </ul>
+      <a class="btn" href="https://github.com/sanket-manohar/nocap/blob/main/TERMS.md">Read the full terms</a>
+      <a class="btn ghost" href="https://github.com/sanket-manohar/nocap/blob/main/LICENSE">MIT License</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Made by <strong>Sanket Santosh Vidya Manohar</strong>. Free and open source.</p>
+    <nav aria-label="Footer">
+      <a href="https://github.com/sanket-manohar/nocap">GitHub</a>
+      <a href="https://github.com/sanket-manohar/nocap#readme">Docs</a>
+      <a href="https://github.com/sanket-manohar/nocap/blob/main/checklists/security/VIBE_CODING_TOP25.md">25 ways vibe-coded apps get hacked</a>
+      <a href="https://github.com/sanket-manohar/nocap/issues">Report an issue</a>
+    </nav>
+  </div>
+</footer>
+
+<div class="toast" role="status" aria-live="polite" id="toast"></div>
+
+<script>
+  const toast = document.getElementById("toast");
+  let toastTimer;
+  function copy(text, label) {
+    const done = () => {
+      toast.textContent = label || "Copied: " + text;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, () => fallback(text, done));
+    } else { fallback(text, done); }
+  }
+  function fallback(text, done) {
+    const t = document.createElement("textarea");
+    t.value = text; t.setAttribute("readonly", ""); t.style.position = "absolute"; t.style.left = "-9999px";
+    document.body.appendChild(t); t.select();
+    try { document.execCommand("copy"); done(); } catch (e) { toast.textContent = "Select the text and copy it manually"; toast.classList.add("show"); }
+    t.remove();
+  }
+
+  // install tabs
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  const cmdText = document.getElementById("cmd-text");
+  function select(tab) {
+    tabs.forEach(t => { const on = t === tab; t.setAttribute("aria-selected", on); t.tabIndex = on ? 0 : -1; });
+    cmdText.textContent = tab.dataset.cmd;
+  }
+  tabs.forEach((tab, i) => {
+    tab.tabIndex = i === 0 ? 0 : -1;
+    tab.addEventListener("click", () => select(tab));
+    tab.addEventListener("keydown", e => {
+      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!d) return;
+      const next = tabs[(i + d + tabs.length) % tabs.length];
+      next.focus(); select(next);
+    });
+  });
+  document.querySelector("[data-copy-target]").addEventListener("click", () => copy(cmdText.textContent, "Copied. Paste it in your terminal."));
+  document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", () => copy(b.dataset.copy, "Copied. Paste it in your AI chat.")));
+</script>
+</body>
+</html>
